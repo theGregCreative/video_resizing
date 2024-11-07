@@ -1,48 +1,63 @@
-// videoResizer.jsx
-// This script is your trusty sidekick in the quest to resize MP4 videos to the legendary 16:9 aspect ratio using the mystical powers of Adobe After Effects
+// videoResizerBatch.jsx
+// This script resizes all MP4 videos in a selected folder to the 16:9 aspect ratio and renames them to include "16x9" in the filename
 
-// Function to resize a video to 16:9
-function resizeTo16x9() {
-    // Summon the file dialog to beseech the user for an MP4 file offering
-    var file = File.openDialog("Select an MP4 file to resize", "*.mp4", false);
-    if (file == null) {
+// Function to resize videos in a folder to 16:9
+function resizeVideosInFolder() {
+    // Summon the folder dialog to beseech the user for a folder of MP4 files
+    var folder = Folder.selectDialog("Select a folder containing MP4 files to resize");
+    if (folder == null) {
         // If the user dares to cancel the quest, we must retreat with a warning
-        alert("No file selected. Exiting script. The resizing adventure is postponed!");
+        alert("No folder selected. Exiting script. The resizing adventure is postponed!");
         return;
     }
 
-    // Import the chosen artifact into the grand project realm
-    var importOptions = new ImportOptions(file);
-    var importedFile = app.project.importFile(importOptions);
+    // Gather all MP4 files in the chosen folder
+    var files = folder.getFiles("*.mp4");
 
-    // Forge a new composition with the exact dimensions of the imported artifact
-    var comp = app.project.items.addComp(
-        importedFile.name, // Name it after the artifact for posterity
-        importedFile.width, // Width of the original artifact
-        importedFile.height, // Height of the original artifact
-        importedFile.pixelAspect, // Maintain the pixel aspect ratio
-        importedFile.duration, // Duration of the video saga
-        importedFile.frameRate // Frame rate to keep the motion smooth
-    );
+    // Traverse the collection of MP4 files, embarking on a resizing quest for each
+    for (var i = 0; i < files.length; i++) {
+        var file = files[i];
 
-    // Add the imported artifact to the composition, like placing a jewel in a crown
-    var layer = comp.layers.add(importedFile);
+        // Import the chosen artifact into the grand project realm
+        var importOptions = new ImportOptions(file);
+        var importedFile = app.project.importFile(importOptions);
 
-    // Calculate the new dimensions to achieve the coveted 16:9 aspect ratio
-    var newWidth = comp.width; // Keep the width as is, for it is sacred
-    var newHeight = (newWidth / 16) * 9; // The magic formula to transform height
+        // Forge a new composition with the exact dimensions of the imported artifact
+        var comp = app.project.items.addComp(
+            importedFile.name, // Name it after the artifact for posterity
+            importedFile.width, // Width of the original artifact
+            importedFile.height, // Height of the original artifact
+            importedFile.pixelAspect, // Maintain the pixel aspect ratio
+            importedFile.duration, // Duration of the video saga
+            importedFile.frameRate // Frame rate to keep the motion smooth
+        );
 
-    // Resize the composition to the new 16:9 dimensions, a transformation worthy of legends
-    comp.width = newWidth;
-    comp.height = newHeight;
+        // Add the imported artifact to the composition, like placing a jewel in a crown
+        var layer = comp.layers.add(importedFile);
 
-    // Adjust the layer scale to fit the new composition size, ensuring it fills the frame like a hero's cape
-    var scaleFactor = (newHeight / importedFile.height) * 100; // Calculate the scale factor in percentage
-    layer.property("Scale").setValue([scaleFactor, scaleFactor]); // Apply the scale factor to both width and height
+        // Calculate the new dimensions to achieve the coveted 16:9 aspect ratio
+        var newWidth = comp.width; // Keep the width as is, for it is sacred
+        var newHeight = (newWidth / 16) * 9; // The magic formula to transform height
 
-    // Announce the successful completion of the resizing quest to the user
-    alert("Video has been resized to 16:9 aspect ratio. Your video is now ready to conquer the widescreen realm!");
+        // Resize the composition to the new 16:9 dimensions, a transformation worthy of legends
+        comp.width = newWidth;
+        comp.height = newHeight;
+
+        // Adjust the layer scale to fit the new composition size, ensuring it fills the frame like a hero's cape
+        var scaleFactor = (newHeight / importedFile.height) * 100; // Calculate the scale factor in percentage
+        layer.property("Scale").setValue([scaleFactor, scaleFactor]); // Apply the scale factor to both width and height
+
+        // Rename the file to include "16x9" in its name
+        var newName = file.name.replace(".mp4", "_16x9.mp4");
+        file.rename(newName);
+
+        // Announce the successful completion of the resizing quest for this file
+        alert("Resized and renamed: " + newName);
+    }
+
+    // Announce the successful completion of the entire resizing quest
+    alert("All videos have been resized to 16:9 aspect ratio and renamed. Your videos are now ready to conquer the widescreen realm!");
 }
 
-// Embark on the resizing adventure
-resizeTo16x9();
+// Embark on the batch resizing adventure
+resizeVideosInFolder();
